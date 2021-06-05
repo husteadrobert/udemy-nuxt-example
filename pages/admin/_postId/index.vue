@@ -1,0 +1,54 @@
+<template>
+  <div class="admin-post-page">
+    <section class="update-form">
+      <AdminPostForm :post="loadedPost" @submit="onSubmit" />
+    </section>
+  </div>
+</template>
+
+<script>
+import AdminPostForm from '@/components/Admin/AdminPostForm'
+import axios from 'axios'
+
+export default {
+  layout: 'admin',
+  middleware: ['check-auth', 'auth'],
+  components: {
+    AdminPostForm
+  },
+  asyncData(context) {
+    return axios.get('https://rh-blog-test-default-rtdb.asia-southeast1.firebasedatabase.app/posts/' + context.params.postId + '.json')
+    .then(res => {
+      return {
+        loadedPost: {...res.data, id: context.params.postId }
+      }
+    })
+    .catch(e => context(e))
+  },
+  // async asyncData(context) {
+  //   const response = await axios.get('https://rh-blog-test-default-rtdb.asia-southeast1.firebasedatabase.app/posts/' + context.params.postId + '.json')
+  //   return { loadedPost: response.data }
+  // }
+  methods: {
+    onSubmit(post) {
+      this.$store.dispatch('editPost', post).then(() => {
+        this.$router.push('/admin')
+      })
+    }
+  }
+
+};
+</script>
+
+<style scoped>
+.update-form {
+  width: 90%;
+  margin: 20px auto;
+}
+
+@media (min-width: 768px) {
+  .update-form {
+    width: 500px;
+  }
+}
+</style>
